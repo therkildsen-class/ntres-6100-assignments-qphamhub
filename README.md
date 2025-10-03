@@ -23,3 +23,7 @@ Please use the following table to grade the student's assignment:
 |      9      |                 |                     |               |
 
 Please indicate if you are **taking this class for credit**
+
+Assignment 2: https://github.com/qphamhub/boxplot.git
+Assignment 3: https://qphamhub.github.io/assignment-3-qnp3/
+#Upload assignment 3 
