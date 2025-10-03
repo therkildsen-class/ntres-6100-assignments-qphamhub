@@ -4,23 +4,95 @@ format: github_document
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+## **Exercise 1: Whale observation (40 min)**
 
 ```{r}
-1 + 1
+# Load required packages
+library(tidyverse)
+library(knitr)
+
+# Read in the data
+whales <- read_csv("https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/main/datasets/whales.csv")
+whales |> 
+  head() |> 
+  kable()
 ```
 
-You can add options to executable code like this
+#### **Question 1. Create a new data frame that has one row per observer, per species and one single variable of all the information collected. Name this data frame `whales_long`.**
 
 ```{r}
-#| echo: false
-2 * 2
+whales_long <- whales |>
+  pivot_longer(-1, names_to = "Species", values_to = "Observer")
+View(whales_long)
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+#### **Question 2. Starting from `whales_long`, create another data frame that includes only events for which there is information. Name this data frame `whales_clean`.**
+
+```{r}
+whales_clean <- whales_long |>
+  filter(!is.na(Observer))
+View(whales_clean)
+```
+
+#### **Question 3. Starting from `whales_clean`, create another data frame with one variable per type of information, one piece of information per cell. Some cells might be empty. Name this data frame `whales_split`.**
+
+```{r}
+whales_split <- whales_clean |>
+  separate(Observer, c("observer", "species", "date", "outcome", "size", "ocean"))
+head(whales_split)
+
+```
+
+#### **Question 4. Starting from `whales_split`, create another data frame in which all columns are parsed as instructed below. Name this data frame `whales_parsed`.**
+
+```{r}
+
+
+```
+
+#### **Question 5. Using `whales_parsed`, print a summary table with: 1) number ship strikes by species, 2) average whale size by species, omitting NA values in the calculation.**
+
+```{r}
+
+```
+
+#### **Question 6. Try to summarize as much information contained in `whales_parsed` as possible in one plot.**
+
+```{r}
+
+```
+
+## **Exercise 2: Baby names (50 min)**
+
+```{r}
+# Load required packages
+library(babynames) #install.packages("babynames")
+
+babynames |> 
+  head() |> 
+  kable()
+
+View(babynames)
+```
+
+#### **Question 1: What are the 6 most popular boy names and girl names of all time? How has the popularity of each of these names changed over time?**
+
+```{r}
+babynames |> 
+  filter(sex == "F") |>
+  group_by(name) |>
+  summarise(total_count=sum(n))
+```
+
+#### **Question 2. What are the most popular boy names and girl names in each decade?**
+
+```{r}
+
+```
+
+#### **Question 3. Continue to explore the `babynames` dataset.**
+
+```{r}
+
+```
