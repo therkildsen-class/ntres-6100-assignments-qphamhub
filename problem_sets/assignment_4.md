@@ -2,6 +2,8 @@ Quang Pham
 
 # Assignment 14 Quarto template
 
+Note: Fixed version after Github disconnection (10/03/2025)
+
 ## Load packages
 
 To start, load all the required packages with the following code.
@@ -93,7 +95,7 @@ economist_data |>
 ``` r
 economist_data |>
   ggplot()+
-  geom_point(mapping = aes(CPI, HDI, colour = Region))
+  geom_point(mapping = aes(CPI, HDI, colour = Region, size = 2))
 ```
 
 ![](assignment_4_files/figure-commonmark/unnamed-chunk-6-1.png)
