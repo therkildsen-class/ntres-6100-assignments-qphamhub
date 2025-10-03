@@ -12,10 +12,10 @@ Please use the following table to grade the student's assignment:
 
 | Assignment# | Fully completed | Partially completed | Not completed |
 |:-----------:|:---------------:|:-------------------:|:-------------:|
-|      1      |       X          |                     |               |
-|      2      |       X          |                     |               |
-|      3      |                 |                     |       X        |
-|      4      |                 |                     |        X       |
+|      1      |        X        |                     |               |
+|      2      |        X        |                     |               |
+|      3      |                 |                     |       X       |
+|      4      |                 |                     |       X       |
 |      5      |                 |                     |               |
 |      6      |                 |                     |               |
 |      7      |                 |                     |               |
@@ -24,6 +24,8 @@ Please use the following table to grade the student's assignment:
 
 Please indicate if you are **taking this class for credit**
 
-Assignment 2: https://github.com/qphamhub/boxplot.git
-Assignment 3: https://qphamhub.github.io/assignment-3-qnp3/
-#Upload assignment 3 
+Assignment 2: <https://github.com/qphamhub/boxplot.git>
+
+**Upload assignment 3 due to Github disconnection**
+
+Assignment 3: <https://qphamhub.github.io/assignment-3-qnp3/>
