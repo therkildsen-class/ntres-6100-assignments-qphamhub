@@ -1,0 +1,155 @@
+---
+title: "assignment-5"
+format: gfm
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(knitr)
+library(gapminder)
+```
+
+```{r}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+## Exercise 1. Trends in land value
+
+This excercise uses a dataset that describes the trends in land value (Land.Value), among other variables, in different states in the US 1975-2013. The states are grouped into four different regions, under the variable region. This dataset was obtained from the Data Science Services of Harvard University.
+
+```{r}
+housing <- read_csv("https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/landdata_states.csv")
+housing %>%
+  head() %>% 
+  kable() 
+```
+
+**1.1 Washington DC was not assigned to a region in this dataset. According to the United States Census Bureau, however, DC is part of the South region. Here:**
+
+-   Change the region of DC to “South” (Hint: there are multiple ways to do this, but `mutate()` and `ifelse()` might be helpful)\*\*
+
+-   Create a new tibble or regular dataframe consisting of this new updated `region` variable along with the original variables `State`, `Date` and `Land.Value` (and no others)\*\*
+
+-   Pull out the records from DC in this new data frame. How many records are there from DC? Show the first 6 lines.\*\*
+
+```{r}
+
+housing2 <- housing |>
+  mutate(region = ifelse(State == "DC", "South", region)) |>
+  select(State, region, Date, Land.Value) |>
+  filter(State == "DC")
+
+View(housing2)
+
+nrow(housing2)
+
+head(housing2, 6)
+
+```
+
+**1.2 Generate a tibble/dataframe that summarizes the mean land value of each region at each time point and show its first 6 lines.**
+
+```{r}
+housing3 <- housing |>
+  group_by(region, Date) |>
+  summarize(mean_land_value = mean(Land.Value))
+head(housing3, 6)
+```
+
+**1.3 Using the tibble/dataframe from 1.2, plot the trend in mean land value of each region through time.**
+
+```{r}
+housing3 |> 
+  ggplot(mapping = aes(Date, mean_land_value, color = region)) + 
+  geom_line() 
+```
+
+## Exercise 2. Life expectancy and GDP per capita 1952-2007
+
+This exercise uses the gapminder dataset from the gapminder package. It describes the life expectancy (lifeExp), GDP per capita (gdpPercap), and population (pop) of 142 countries from 1952 to 2007. These countries can be grouped into 5 continents. As a reminder, reproduce the following plots exactly as shown.
+
+```{r}
+gapminder %>% 
+  head() %>% 
+  kable()
+```
+
+**2.1 Use a scatterplot to explore the relationship between per capita GDP (gdpPercap) and life expectancy (lifeExp) in the year 2007.**
+
+```{r}
+gapminder|>
+  filter(year == 2007) |>
+  ggplot(mapping = aes(gdpPercap, lifeExp)) +
+  geom_point()
+```
+
+**2.2 Add a smoothing line to the previous plot.**
+
+```{r}
+gapminder|>
+  filter(year == 2007) |>
+  ggplot(mapping = aes(gdpPercap, lifeExp)) +
+  geom_point() +
+  geom_smooth()
+```
+
+**2.3 Exclude Oceania from the previous plot, show each continent in a different color, and fit a separate smoothing line to each continent to identify differences in this relationship between continents. Turn off the confidence intervals.**
+
+Note: only two Oceanian countries are included in this dataset, and geom_smooth() does not work with two data points, which is why they are excluded.
+
+```{r}
+gapminder|>
+  filter(year == 2007, continent != "Oceania") |>
+  ggplot(mapping = aes(gdpPercap, lifeExp, color = continent)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+```
+
+**2.4 Use faceting to solve the same problem. Include the confidence intervals in this plot.**
+
+```{r}
+gapminder|>
+  filter(year == 2007, continent != "Oceania") |>
+  ggplot(mapping = aes(gdpPercap, lifeExp, color = continent)) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(~ continent, nrow = 2)
+```
+
+**2.5 Explore the trend in life expectancy through time in each continent. Color by continent.**
+
+```{r}
+gapminder|>
+  ggplot(mapping = aes(year, lifeExp, group = country, color = continent)) +
+  geom_line() +
+  facet_wrap(~ continent)
+```
+
+**2.6 From the previous plot, we see some abnormal trends in Asia and Africa, where the the life expectancy in some countries sharply dropped at certain time periods. Here, we look into what happened in Asia in more detail. First, create a new dataset by filtering only the Asian countries. Show the first 6 lines of this filtered dataset.**
+
+```{r}
+asia <- gapminder |>
+  filter(continent == "Asia") 
+head(asia, 6)
+```
+
+**2.7 Using the filtered dataset, identify the countries that had abnormal trends in life expectancy by plotting, and discuss historical events possibly explaining these trends. (Hint: facet by country)**
+
+```{r}
+asia_drop <- asia |>
+  group_by(country) |>
+  arrange(year) |>
+  mutate(change = lifeExp - lag(lifeExp)) |> 
+  filter(!is.na(change), change < -3) |>
+  distinct(country)
+
+asia |>
+  filter(country %in% asia_drop$country) |>
+  ggplot(mapping = aes(year, lifeExp, group = country, color = country)) +
+  geom_line() +
+  facet_wrap(~ country)
+  
+```
+
+Reasoning for drops: War and famine.
