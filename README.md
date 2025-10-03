@@ -21,3 +21,5 @@ Please use the following table to grade the student's assignment:
 |      7      |                 |                     |               |
 |      8      |                 |                     |               |
 |      9      |                 |                     |               |
+
+Please indicate if you are **taking this class for credit**
