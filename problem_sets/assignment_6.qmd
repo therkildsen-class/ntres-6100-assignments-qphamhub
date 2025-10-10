@@ -65,18 +65,20 @@ This dataset contains the weather and air quality data collected by a weather st
 taiwan <- read.delim("https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/2015y_Weather_Station_notes.txt")
 kable(taiwan)
 ```
+
 ### 2.2 Data tidying
-- Import https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/2015y_Weather_Station.csv into R. As you can see, this dataset is a classic example of untidy data: values of a variable (i.e. hour of the day) are stored as column names; variable names are stored in the item column.
 
-- Clean this dataset up and restructure it into a tidy format.
+-   Import https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/2015y_Weather_Station.csv into R. As you can see, this dataset is a classic example of untidy data: values of a variable (i.e. hour of the day) are stored as column names; variable names are stored in the item column.
 
-- Parse the date variable into date format and parse hour into time.
+-   Clean this dataset up and restructure it into a tidy format.
 
-- Turn all invalid values into NA and turn NR in rainfall into 0.
+-   Parse the date variable into date format and parse hour into time.
 
-- Parse all values into numbers.
+-   Turn all invalid values into NA and turn NR in rainfall into 0.
 
-- Show the first 6 rows and 10 columns of this cleaned dataset, as shown below, without using kable().
+-   Parse all values into numbers.
+
+-   Show the first 6 rows and 10 columns of this cleaned dataset, as shown below, without using kable().
 
 ```{r}
 datas_2 <- read.csv("https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/2015y_Weather_Station.csv") |>
@@ -127,4 +129,3 @@ Hint: uniting the date and hour and parsing the new variable might be helpful.
 ```{r}
 
 ```
-
