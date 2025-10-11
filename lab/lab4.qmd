@@ -1,0 +1,78 @@
+---
+title: "lab4"
+format: gfm
+editor: visual
+---
+
+```{r}
+library(dslabs) #installed.packages("dslabs")
+library(tidyverse)
+
+View(gapminder)
+summary(gapminder)
+
+#Question1 
+top_5 <- gapminder |>
+  filter(year == "2015") |> 
+  arrange(-population) |> 
+  select (country) |>
+  head(5) |>
+  pull()
+
+top_5_data <- gapminder |>
+  filter(country %in% top_5)
+
+ggplot(top_5_data, mapping = aes(x = year, y = population, color = country))+
+  geom_line()
+
+#Question2
+gapminder |>
+  filter(year == "2015", country %in% c("Turkey", "Poland", "South Korea", "Russia", "Vietnam", "South Africa")) |> 
+  arrange(-infant_mortality) |> 
+  select(country, infant_mortality)
+  
+#Question3 
+gapminder |>
+  filter(year == "2000") |>
+  ggplot(mapping = aes(x = gdp/population, y = fertility)) + 
+  geom_point() + 
+  geom_smooth()
+
+#Question4
+gapminder |>
+  filter(year == "2000") |>
+  ggplot(mapping = aes(x = gdp/population, y = fertility, color = continent)) + 
+  geom_point() +
+  geom_smooth()
+
+#Question5
+gapminder |>
+  filter(year == "2015") |>
+  select(continent, population) |>
+  ggplot() +
+  geom_col(mapping = aes(x = continent, y = population))
+
+#Question6
+gapminder |> 
+  filter(year == "2015") |>
+  #select(continent, life_expectancy) |>
+  summarize(life_expectancy=sum(life_expectancy*population)/sum(population)
+ #ggplot()+
+  #geom_boxplot(mapping = aes(x = continent, y = life_expectancy))
+
+ #Question7
+ 
+ gapminder |> 
+  filter(year == "2015", continent %in% c("Europe", "Africa")) |>
+   ggplot()+
+   geom_boxplot(mapping = aes(x = continent, y = life_expectancy))
+
+#Exercise 2
+#Make box plot for 2-trait correlation (life_expectancy vs log(gdp/pop/sth) for Asia vs Europe
+
+```
+
+```{r}
+#| echo: false
+2 * 2
+```

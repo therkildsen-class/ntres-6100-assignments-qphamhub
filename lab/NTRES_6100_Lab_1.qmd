@@ -1,0 +1,48 @@
+---
+title: "NTRES_6100_Lab_1"
+author: "Quang Pham"
+date: "08/29/2025"
+format: pdf
+editor: visual
+engine: knitr #Add this to your YAML header
+output:
+  html_document:
+    toc: true
+    toc_depth: 4
+---
+
+## Quarto
+
+### Quang
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+There are `r nrow(cars)` observations in the cars dataset, and `r ncol(cars)` variables\
+
+![](images/Eclectus-parrot_david-clode-XacjgAoqdnI-unsplash-copy-01.jpg){width="422"}
+
+<center>Lab 1</center>
+
+[uggg]{style="float:right"}
+
+```{r}
+#| eval = FALSE 
+2*2
+```

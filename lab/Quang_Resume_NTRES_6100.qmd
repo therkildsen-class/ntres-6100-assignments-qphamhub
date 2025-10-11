@@ -1,0 +1,30 @@
+---
+title: "Quang Pham"
+format: html
+editor: visual
+---
+
+<br> <br>
+
+## Education
+
+### Cornell University
+
+```{r}
+#| fig-align: left
+#| fig-width: 3
+
+knitr::include_graphics("https://1000logos.net/wp-content/uploads/2022/06/Cornell-University-Logo.jpg")
+```
+
+#### *Expected graduation: **2029***
+
+-   GPA: 4.0/4.0
+
+-   Awards: Cornell Fellowship (2024)
+
+## Professional Experience
+
+## Leadership Experience
+
+## Skills and Interests
