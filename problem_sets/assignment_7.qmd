@@ -38,7 +38,7 @@ head(q_1a, 6)
 
 ```{r, message=FALSE, warning=FALSE}
 q_1b <- q_1a |>
-  mutate(winner = case_when(clinton > trump ~ "Clinton", trump > clinton ~ "Trump")) |>
+  mutate(winner = case_when(clinton > trump ~ "clinton", trump > clinton ~ "trump")) |>
   select(-abb, -region, -total)
 head(q_1b, 6)
   
@@ -74,7 +74,7 @@ head(q_2b, 6)
 
 **2c.** Use the `q_2b` dataset to contruct a bar plot to show the final electoral vote share under the scenarios of **1)** each state has the number of electoral votes that it currently has, and **2)** each state has the number of electoral votes that is exactly proportional to its population size. Here, assume that for each state, the winner will take all its electoral votes.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 q_2b |>
   group_by(metric) |>
   mutate(value = (value - min(value)) / (max(value) - min(value))) |>
@@ -94,16 +94,17 @@ q_2b |>
 
 *Hint: `pivot_longer()` may be useful in here.*
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 data <- read.csv("https://raw.githubusercontent.com/kshaffer/election2016/master/2016ElectionResultsByState.csv")
+View(data)
 q_3a <- data |>
   pivot_longer(cols = c(clintonVotes, trumpVotes, othersVotes),
                names_to = "winner",
                values_to = "value") |>
   mutate(winner = case_when(
-    winner == "clintonVotes" ~ "Clinton",
-    winner == "trumpVotes" ~ "Trump",
-    winner == "othersVotes" ~ "Others"
+    winner == "clintonVotes" ~ "clinton",
+    winner == "trumpVotes" ~ "trump",
+    winner == "othersVotes" ~ "others"
   )) |>
   group_by(winner) |>
   summarize(value = sum(value, na.rm = TRUE), .groups = "drop") |>
@@ -114,7 +115,7 @@ head(q_3a)
 
 **3b.** Combine the `q_2b` dataset with the `q_3a` dataset. Call this new dataset `q_3b`, and print it as shown below.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 q_3b <- full_join(q_2b, q_3a)
 print(q_3b)
 
@@ -122,8 +123,8 @@ print(q_3b)
 
 **3c.** Lastly, use the `q_3b` dataset to contruct a bar plot to show the final vote share under the scenarios of **1)** each state has the number of electoral votes that it currently has, **2)** each state has the number of electoral votes that is exactly proportional to its population size, and **3)** the election result is determined by the popular vote.
 
-```{r}
-q_3b <- q_3b |>
+```{r, message=FALSE, warning=FALSE}
+q_3b |>
   group_by(metric) |>
   mutate(value = (value - min(value)) / (max(value) - min(value))) |>
   ungroup()
@@ -141,7 +142,15 @@ q_3b |>
 
 *Hint: `group_by()` and `slice_max()` can be useful for this question. Check out the help file for `slice_max()` for more info.*
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
+View(polls_us_election_2016)
+q_4a <- polls_us_election_2016 |>
+  filter(pollster == "Ipsos", state != "U.S.") |>
+  group_by(state) |>
+  slice_max(order_by = enddate, n = 1, with_ties = FALSE) |>
+  ungroup() |>
+  select(state, adjpoll_clinton, adjpoll_trump)
+head(q_4a, 6)
 
 ```
 
@@ -159,12 +168,27 @@ q_3b |>
 
 Keep only the columns `state`, `polling_error`, `result`, `electoral_votes`. Name the new dataset `q_4b` and show its first 6 rows.
 
-```{r}
-
+```{r, message=FALSE, warning=FALSE}
+View(q_4a)
+View(q_1b)
+q_4b <- q_4a |>
+  inner_join(q_1b, by = "state") |>
+  mutate(
+    polling_margin = adjpoll_clinton - adjpoll_trump,
+    actual_margin = clinton - trump,
+    polling_error = polling_margin - actual_margin,
+    predicted_winner = ifelse(adjpoll_clinton > adjpoll_trump, "clinton", "trump"),
+    result = ifelse(winner == predicted_winner, "correct prediction", str_c("unexpected ", winner, " win"))) |>
+  select(state, polling_error, result, electoral_votes)
+head(q_4b, 6)
 ```
 
 **c.** Generate the following plot with the `q_4b` dataset. Use chunk options to adjust the dimensions of the plot to make it longer than the default dimension. Based on this plot, where did the polls get wrong in the 2016 election?
 
-```{r}
-
+```{r, message=FALSE, warning=FALSE}
+View(q_4b)
+q_4b |>
+  ggplot(mapping = aes(polling_error, state, color = result, size = electoral_votes, fig.height=10)) +
+  geom_point() 
 ```
+
