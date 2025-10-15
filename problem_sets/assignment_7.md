@@ -94,7 +94,7 @@ size to 0.1, and turn off its confidence interval.
 q_1b |>
   ggplot(mapping = aes(population, electoral_votes, color = winner)) +
   geom_point() +
-  geom_smooth(colour = "black", size = 0.1)
+  geom_smooth(colour = "black", size = 0.1, se = FALSE)
 ```
 
 ![](assignment_7_files/figure-commonmark/unnamed-chunk-4-1.png)
@@ -105,9 +105,40 @@ q_1b |>
 `population` and `electoral_votes` columns are turned into rows as shown
 below. Name this new dataset `q_2a`, and show its first 6 rows.
 
+``` r
+q_2a <- q_1b |> 
+  pivot_longer(cols = c("population", "electoral_votes"), names_to = "metric", values_to = "value")
+head(q_2a, 6)
+```
+
+    # A tibble: 6 × 10
+      state   clinton trump johnson stein mcmullin others winner metric        value
+      <chr>     <dbl> <dbl>   <dbl> <dbl>    <dbl>  <dbl> <chr>  <chr>         <dbl>
+    1 Alabama    34.4  62.1    2.09 0.442    0       1.02 Trump  population   4.78e6
+    2 Alabama    34.4  62.1    2.09 0.442    0       1.02 Trump  electoral_v… 9   e0
+    3 Alaska     36.6  51.3    5.88 1.80     0       4.49 Trump  population   7.10e5
+    4 Alaska     36.6  51.3    5.88 1.80     0       4.49 Trump  electoral_v… 3   e0
+    5 Arizona    44.6  48.1    4.08 1.32     0.670   1.27 Trump  population   6.39e6
+    6 Arizona    44.6  48.1    4.08 1.32     0.670   1.27 Trump  electoral_v… 1.1 e1
+
 **2b.** Then, sum up the number of electoral votes and population size
 across all states for each candidate. Name this new dataset `q_2b`, and
 print it as shown below.
+
+``` r
+q_2b <- q_2a |>
+  group_by(metric, winner) |>
+  summarize(value = sum(value, na.rm = TRUE), .groups = "drop")
+head(q_2b, 6)
+```
+
+    # A tibble: 4 × 3
+      metric          winner      value
+      <chr>           <chr>       <dbl>
+    1 electoral_votes Clinton       232
+    2 electoral_votes Trump         306
+    3 population      Clinton 134982448
+    4 population      Trump   174881780
 
 **2c.** Use the `q_2b` dataset to contruct a bar plot to show the final
 electoral vote share under the scenarios of **1)** each state has the
@@ -116,7 +147,28 @@ has the number of electoral votes that is exactly proportional to its
 population size. Here, assume that for each state, the winner will take
 all its electoral votes.
 
-*Hint: `geom_col(position = "fill")` might be helpful.*
+``` r
+q_2b |>
+  group_by(metric) |>
+  mutate(value = (value - min(value)) / (max(value) - min(value))) |>
+  ungroup()
+```
+
+    # A tibble: 4 × 3
+      metric          winner  value
+      <chr>           <chr>   <dbl>
+    1 electoral_votes Clinton     0
+    2 electoral_votes Trump       1
+    3 population      Clinton     0
+    4 population      Trump       1
+
+``` r
+q_2b |>
+  ggplot(aes(x = metric, y = value, fill = winner)) +
+  geom_col(position = "fill")
+```
+
+![](assignment_7_files/figure-commonmark/unnamed-chunk-7-1.png)
 
 ### **Question 3. What if the election was determined by popular votes?**
 
@@ -131,8 +183,54 @@ single `others` category (as shown in the table below)*
 
 *Hint: `pivot_longer()` may be useful in here.*
 
+``` r
+data <- read.csv("https://raw.githubusercontent.com/kshaffer/election2016/master/2016ElectionResultsByState.csv")
+q_3a <- data |>
+  pivot_longer(cols = c(clintonVotes, trumpVotes, othersVotes),
+               names_to = "winner",
+               values_to = "value") |>
+  mutate(winner = case_when(
+    winner == "clintonVotes" ~ "Clinton",
+    winner == "trumpVotes" ~ "Trump",
+    winner == "othersVotes" ~ "Others"
+  )) |>
+  group_by(winner) |>
+  summarize(value = sum(value, na.rm = TRUE), .groups = "drop") |>
+  mutate(metric = "popular_votes") |>
+  select(metric, winner, value)
+head(q_3a)
+```
+
+    # A tibble: 3 × 3
+      metric        winner     value
+      <chr>         <chr>      <int>
+    1 popular_votes Clinton 65125640
+    2 popular_votes Others    541623
+    3 popular_votes Trump   62616675
+
 **3b.** Combine the `q_2b` dataset with the `q_3a` dataset. Call this
 new dataset `q_3b`, and print it as shown below.
+
+``` r
+q_3b <- full_join(q_2b, q_3a)
+```
+
+    Joining with `by = join_by(metric, winner, value)`
+
+``` r
+print(q_3b)
+```
+
+    # A tibble: 7 × 3
+      metric          winner      value
+      <chr>           <chr>       <dbl>
+    1 electoral_votes Clinton       232
+    2 electoral_votes Trump         306
+    3 population      Clinton 134982448
+    4 population      Trump   174881780
+    5 popular_votes   Clinton  65125640
+    6 popular_votes   Others     541623
+    7 popular_votes   Trump    62616675
 
 **3c.** Lastly, use the `q_3b` dataset to contruct a bar plot to show
 the final vote share under the scenarios of **1)** each state has the
@@ -140,6 +238,19 @@ number of electoral votes that it currently has, **2)** each state has
 the number of electoral votes that is exactly proportional to its
 population size, and **3)** the election result is determined by the
 popular vote.
+
+``` r
+q_3b <- q_3b |>
+  group_by(metric) |>
+  mutate(value = (value - min(value)) / (max(value) - min(value))) |>
+  ungroup()
+
+q_3b |>
+  ggplot(aes(x = metric, y = value, fill = winner)) +
+  geom_col(position = "fill")
+```
+
+![](assignment_7_files/figure-commonmark/unnamed-chunk-10-1.png)
 
 ### **Question 4. The election result in 2016 came as a huge surprise to many people, especially given that most polls predicted Clinton would win before the election. Where did the polls get wrong?**
 

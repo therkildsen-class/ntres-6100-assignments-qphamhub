@@ -50,28 +50,39 @@ head(q_1b, 6)
 q_1b |>
   ggplot(mapping = aes(population, electoral_votes, color = winner)) +
   geom_point() +
-  geom_smooth(colour = "black", size = 0.1)
+  geom_smooth(colour = "black", size = 0.1, se = FALSE)
 ```
 
 ### **Question 2. Would the election result be any different if the number of electoral votes is exactly proportional to a state’s population size?**
 
 **2a.** First, convert the `q_1b` dataset to longer format such that the `population` and `electoral_votes` columns are turned into rows as shown below. Name this new dataset `q_2a`, and show its first 6 rows.
 
-```{r}
-
+```{r, message=FALSE, warning=FALSE}
+q_2a <- q_1b |> 
+  pivot_longer(cols = c("population", "electoral_votes"), names_to = "metric", values_to = "value")
+head(q_2a, 6)
 ```
 
 **2b.** Then, sum up the number of electoral votes and population size across all states for each candidate. Name this new dataset `q_2b`, and print it as shown below.
 
-```{r}
-
+```{r, message=FALSE, warning=FALSE}
+q_2b <- q_2a |>
+  group_by(metric, winner) |>
+  summarize(value = sum(value, na.rm = TRUE), .groups = "drop")
+head(q_2b, 6)
 ```
 
 **2c.** Use the `q_2b` dataset to contruct a bar plot to show the final electoral vote share under the scenarios of **1)** each state has the number of electoral votes that it currently has, and **2)** each state has the number of electoral votes that is exactly proportional to its population size. Here, assume that for each state, the winner will take all its electoral votes.
 
-*Hint: `geom_col(position = "fill")` might be helpful.*
-
 ```{r}
+q_2b |>
+  group_by(metric) |>
+  mutate(value = (value - min(value)) / (max(value) - min(value))) |>
+  ungroup()
+
+q_2b |>
+  ggplot(aes(x = metric, y = value, fill = winner)) +
+  geom_col(position = "fill")
 
 ```
 
@@ -84,19 +95,42 @@ q_1b |>
 *Hint: `pivot_longer()` may be useful in here.*
 
 ```{r}
-
+data <- read.csv("https://raw.githubusercontent.com/kshaffer/election2016/master/2016ElectionResultsByState.csv")
+q_3a <- data |>
+  pivot_longer(cols = c(clintonVotes, trumpVotes, othersVotes),
+               names_to = "winner",
+               values_to = "value") |>
+  mutate(winner = case_when(
+    winner == "clintonVotes" ~ "Clinton",
+    winner == "trumpVotes" ~ "Trump",
+    winner == "othersVotes" ~ "Others"
+  )) |>
+  group_by(winner) |>
+  summarize(value = sum(value, na.rm = TRUE), .groups = "drop") |>
+  mutate(metric = "popular_votes") |>
+  select(metric, winner, value)
+head(q_3a)
 ```
 
 **3b.** Combine the `q_2b` dataset with the `q_3a` dataset. Call this new dataset `q_3b`, and print it as shown below.
 
 ```{r}
+q_3b <- full_join(q_2b, q_3a)
+print(q_3b)
 
 ```
 
 **3c.** Lastly, use the `q_3b` dataset to contruct a bar plot to show the final vote share under the scenarios of **1)** each state has the number of electoral votes that it currently has, **2)** each state has the number of electoral votes that is exactly proportional to its population size, and **3)** the election result is determined by the popular vote.
 
 ```{r}
+q_3b <- q_3b |>
+  group_by(metric) |>
+  mutate(value = (value - min(value)) / (max(value) - min(value))) |>
+  ungroup()
 
+q_3b |>
+  ggplot(aes(x = metric, y = value, fill = winner)) +
+  geom_col(position = "fill")
 ```
 
 ### **Question 4. The election result in 2016 came as a huge surprise to many people, especially given that most polls predicted Clinton would win before the election. Where did the polls get wrong?**
