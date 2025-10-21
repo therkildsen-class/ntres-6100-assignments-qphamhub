@@ -40,7 +40,7 @@ following form:
 ``` r
 #z <- NULL
 #for (i in 1:length(x)){
-  #z <- c(z, x[i] + y[i])
+#  z <- c(z, x[i] + y[i])
 #}
 ```
 
@@ -227,7 +227,7 @@ system.time({
 ```
 
        user  system elapsed 
-      0.006   0.000   0.006 
+      0.006   0.001   0.007 
 
 Although the for loop in this exercise can be run very quickly, it is
 noticeably slower than the vectorization approach. With more complicated
@@ -253,18 +253,52 @@ in the
 
 - What parts are different?
 
-Answer: *Write your response here.*
+``` r
+buoy_1987 <- read_csv('https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_1987.csv', na = c("99", "999", "99.00", "999.0"))
+buoy_1988 <- read_csv('https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_1988.csv', na = c("99", "999", "99.00", "999.0"))
+buoy_1989 <- read_csv('https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_1989.csv', na = c("99", "999", "99.00", "999.0"))
+buoy_1990 <- read_csv('https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_1990.csv', na = c("99", "999", "99.00", "999.0"))
+```
+
+Answer: The functions are similar across every line/code chunk of mine.
+The data input and the objects that I assign those data to are
+different.
 
 #### **2.2 Complete the skeleton of the for loop below, which uses the `str_c()` function to print out the path to the buoy 44013 data file from year `start` to `end`**
 
-Here is how it should work with `start = 1987` and `end = 1992`:
+``` r
+start <- 1987
+end <- 1992
+for (year in start:end){
+  path <- str_c("https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_", year, ".csv")
+  print(path)
+}
+```
+
+    [1] "https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_1987.csv"
+    [1] "https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_1988.csv"
+    [1] "https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_1989.csv"
+    [1] "https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_1990.csv"
+    [1] "https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_1991.csv"
+    [1] "https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_1992.csv"
 
 #### **2.3 Complete the skeleton of the for loop below, which reads the buoy 44013 data file from year `start` to `end` and combine them together**
 
 **Hint:** `bind_rows()` could be useful for this question.
 
-Here is the dimension of the combined data frame (`df_combined`) with
-`start = 1987` and `end = 1992`:
+``` r
+start <- 1987
+end <- 1992
+df_combined <- NULL
+for (year in start:end){
+  path <- str_c("https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_", year, ".csv")
+  df <- read_csv(path)
+  df_combined <- bind_rows(df_combined, df)
+}
+dim(df_combined)
+```
+
+    [1] 49775    16
 
 #### **2.4 Building on the workflow that you used in 2.1 - 2.3, use a for loop to read in, clean up, and summarize the buoy data from all years from 1987 to 1992 using a dplyr workflow.**
 
@@ -281,3 +315,63 @@ well combine all the raw data in a for loop and clean it up after the
 loop. We recommend you to do the cleanup within the loop though as a
 chance to practice. In the next (optional) question, however, it is
 necessary to clean up the data in the loop before you can combine them.
+
+``` r
+library(dplyr)
+
+start <- 1987
+end <- 1992 
+df_24 <- NULL
+
+for (year in start:end) {
+path <- str_c("https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_", year, ".csv")
+df <- read_csv(path)
+df_clean <- df |>
+  select(YY, MM, WVHT, WTMP) |>
+  rename(year = YY, month = MM, wave_height = WVHT, temperature = WTMP) |>
+  group_by(year, month) |>
+  summarize(wave_height_mean = mean(wave_height, na.rm = TRUE), mean_temperature = mean(temperature, na.rm = TRUE), .groups = "drop")
+
+df_24 <- bind_rows(df_24, df_clean)
+}
+
+head(df_24)
+```
+
+    # A tibble: 6 × 4
+       year month wave_height_mean mean_temperature
+      <dbl> <dbl>            <dbl>            <dbl>
+    1    87     1            2.97             10.1 
+    2    87     2            0.912             2.91
+    3    87     3            1.42              4.11
+    4    87     4            1.65              5.53
+    5    87     5            0.943            10.2 
+    6    87     6            0.636            17.0 
+
+``` r
+View(df_24)
+
+df_24 <- df_24 |> mutate(year_month = as.Date(paste(year, month, "15", sep = "-")))
+
+ggplot(df_24, aes(x = year_month, y = mean_temperature)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Monthly average temperature from 1987 to 1992",
+    x = "year_month",
+    y = "temperature_c_mean")
+```
+
+![](assignment_8_files/figure-commonmark/unnamed-chunk-13-1.png)
+
+``` r
+ggplot(df_24, aes(x = year_month, y = wave_height_mean)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Monthly average wave height from 1987 to 1992",
+    x = "year_month",
+    y = "wave_height_mean")
+```
+
+![](assignment_8_files/figure-commonmark/unnamed-chunk-13-2.png)
