@@ -175,20 +175,20 @@ df_24 <- NULL
 
 for (year in start:end) {
 path <- str_c("https://raw.githubusercontent.com/nt246/NTRES-6100-data-science/master/datasets/buoydata/44013_", year, ".csv")
-df <- read_csv(path)
+df <- read_csv(path, na = c("99.0", "999.0"))
 df_clean <- df |>
   select(YY, MM, WVHT, WTMP) |>
   rename(year = YY, month = MM, wave_height = WVHT, temperature = WTMP) |>
+  # mutate(temperature = replace_na(temperature, 0), wave_height = replace_na(wave_height, 0)) |> 
   group_by(year, month) |>
-  summarize(wave_height_mean = mean(wave_height, na.rm = TRUE), mean_temperature = mean(temperature, na.rm = TRUE), .groups = "drop")
+  summarize(wave_height_mean = mean(wave_height,rm.na=T), mean_temperature = mean(temperature,rm.na=T), .groups = "drop")
 
 df_24 <- bind_rows(df_24, df_clean)
 }
 
-head(df_24)
 View(df_24)
 
-df_24 <- df_24 |> mutate(year_month = as.Date(paste(year, month, "15", sep = "-")))
+df_24 <- df_24 |> mutate(year = as.integer(year), year = ifelse(year < 100, year + 1900, year), year_month = as.Date(paste(year, month, "15", sep = "-")))
 
 ggplot(df_24, aes(x = year_month, y = mean_temperature)) +
   geom_line() +
@@ -197,7 +197,10 @@ ggplot(df_24, aes(x = year_month, y = mean_temperature)) +
     title = "Monthly average temperature from 1987 to 1992",
     x = "year_month",
     y = "temperature_c_mean")
+ 
+```
 
+```{r}
 ggplot(df_24, aes(x = year_month, y = wave_height_mean)) +
   geom_line() +
   geom_point() +
@@ -205,17 +208,24 @@ ggplot(df_24, aes(x = year_month, y = wave_height_mean)) +
     title = "Monthly average wave height from 1987 to 1992",
     x = "year_month",
     y = "wave_height_mean")
-
-  
-  
-  
-
-
-
-
-
-
-
-
- 
 ```
+
+#### **Reflection Questions:**
+
+**When is vectorization preferable to loops in R, and when are loops the right choice? Provide two concrete examples from the assignment:**
+
+-   **Vectorization is preferable for basic, simple operations whereas loops are for iteration of data**
+
+-   Example of vectorization: Assignment 1
+
+-   Example of loop: Assignment 2
+
+**Which AI prompt was most helpful? What did you learn, and how was correctness verified? Include before/after code snippets with commentary.**
+
+-   I used AI by providing instructions and examples and output (chain-of-thought) to fix my problem of the mutate function in Exercise 2.4 - my code plots year in the format of 00-XX (e.g. 0088), instead of 19-XX (e.g. 1988).
+
+-   AI suggested that i need to convert year data from 2-digit to 4-digit to be interpreted in R and suggested that I added extra lines within the mutate function:
+
+-   Before: df_24 \<- df_24 \|\> mutate(year_month = as.Date(paste(year, month, "15", sep = "-")))
+
+-   After: df_24 \<- df_24 \|\> mutate(year = as.integer(year), year = ifelse(year \< 100, year + 1900, year), year_month = as.Date(paste(year, month, "15", sep = "-"))
